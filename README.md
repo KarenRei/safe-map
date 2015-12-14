@@ -1,9 +1,10 @@
 # safe-map
 
 Author: Karen Pease (meme01@eaku.net)
+
 License: Public domain. Do as you will! No warranty either express or implied.
 
-== Introduction ==
+## Introduction
 
 Threading is critical to many modern applications and the latest C++ standards make it easy to launch threads and control locks. Unfortunately, the STL containers themselves are very much not threadsafe. While the non-atomic nature of the individual container function calls can be worked around by keeping a mutex for the container and locking it for each operation, this unfortunately doesn't keep iterators to the map safe. Even having a map of smart pointers doesn't cut it - the iterator contains a pointer to the smart pointer but not the smart pointer itself, and thus does nothing to preserve the reference.
 
@@ -12,7 +13,7 @@ There are a few ways to work around this. For example, Intel's TBB contains seve
 These issues inspired the creation of safe_map: a complete wrapping of std::map to provide thread safety, even for iterators.  A wide variety of template parameters are available for controlling its behavior, even allowing for circular maps.
 
 
-== How it works ==
+## How it works 
 
 In short, it works similar to smart pointers.  The second template argument to the map is wrapped into a class that contains a reference counter and an erasure-request flag. The iterators themselves are also wrapped in order to add functions to increment and decrement the references as needed.  Any std::map function that can take or return a normal iterator is provided with a wrapper - for example, find, begin, etc - which returns a wrapped iterator instead of a bare iterator. Unlike key lookups, reference counting is a fast process - the required std::mutex locking is significantly slower than the reference-counting code itself.
 
@@ -23,18 +24,18 @@ The two files needed to use it are number.h (a generic number wrapping class) an
 Because the second argument to the map gets variables added to it, it must be a class. To support use of base types as the second argument, these are doubly wrapped, first into a generic number wrapper, and then into the map wrapper.
 
 
-== What does it mean to erase an element that might still be in use elsewhere? ==
+## What does it mean to erase an element that might still be in use elsewhere? 
 
 If an erasure flag is set on an element, it is immediately orphaned. One can think of this like removing a file inode in unix - files that already have it open can keep using it, but someone listing the directory will no longer see the file.  In the case of a map element that's been deleted while someone is using it, the element stays perfectly valid until their iterator is descoped, wherein its memory will be freed.  If one searches for a specific object that's been marked for deletion (such as with find()), they can still find it, but it's still subject to erasure when all references to it expire.
 
 
-== Use cases and performance ==
+## Use cases and performance 
 
 Oftentimes programmers need to deal with large amounts of data elements where each element represents an independent record, searches may expect to come up empty, and where many different tasks may need to be done on different parts of the data simultaneously. File systems, for example, are a non-memory data structure which is structured like this in everyday life.  In memory, caches and data stores often fall into this scenario as well. Without built-in thread safety, one has to resort to performance-hitting alternatives like locking the whole structure for the duration of long operations or having to do frequent lookups into the structure in lieu of being able to keep iterators open.
 
 It's hard to make generalized statements about performance, as it depends highly on the scenario.  Versus the above situations, safe::map will yield higher throughput and/or reduced latency in the majority of situations, often dramatically. Versus regular one-at-a-time iterative in a std::map, however, it takes a performance hit in terms of the extra reference counting overhead and the mutex locking.  If said tasks are quick, there might be a significant slowdown by use of safe::map. However, if said tasks are at all CPU intensive, the effect of using safe::map will likely be unnoticeable.
 
-== Implementation notes ==
+## Implementation notes 
 
 This class handles all of those awkward situations, such as when one thread deletes an object that another thread is working on. But this leaves some implementation details that one should be aware of.
 
@@ -70,9 +71,13 @@ While the IterationType specified in the class template will define what happens
 do_minus(), do_plus(), do_minus(int), do_plus(int): like their respective operator++ / operator-- functions, except that they ignore whether an iterator is reversed or not; minus is always toward the beginning and plus is always toward the end.
 
 decrement_active_circular, increment_active_circular: Acts like iteraton=OnlyForward, circular=true
+
 decrement_forward, increment_forward: Acts like iteraton=OnlyForward, circular=false
-decrement_forward_then_backward, increment_forward_then_backard: Acts like iteraton=ForwardThenBackward (or ForwardSameThenBackward, if iteraton==ForwardSameThenBackward), circular=false.
+
+decrement_forward_then_backward, increment_forward_then_backard: Acts like iteraton=ForwardThenBackward (or ForwardSameThenBackward, if iteraton##ForwardSameThenBackward), circular=false.
+
 decrement_even_erased_linear, increment_even_erased_linear: Acts like iteration=EvenErased, circular=false
+
 decrement_even_erased_circular, increment_even_erased_circular: Acts like iteration=EvenErased, circular=false
 
 4) safe::map iterators are more resistant to undefined behavior than std::map iterators
@@ -83,7 +88,7 @@ Because of the need for a variety of overhead checks anyway to implement this cl
 
 A note about reverse iterators: reverse iterators posed a special implementation problem. Consider the following example with std::map:
 
-------------------
+```
 #include <iostream>
 #include <map>
 
@@ -98,12 +103,15 @@ int main(int argc, char** argv)
 
   return 0;
 }
-------------------
+```
+
 
 This prints out:
 
+```
 1, 1
 2, 2
+```
 
 Nobody has touched reverse_iter, nor done anything with the element that it points to - yet nonetheless it's changed. How? Because internally reverse iterators actually point to the element *after* (from a forward-iterator perspective) the one that they seem to point to. So when a new entry is inserted, the reverse iterator suddenly starts pointing to it instead.
 
@@ -119,12 +127,12 @@ In case you're wondering: yes, you can bring an element flagged for deletion bac
 
 safe::map has one more template parameter worth mentioning: "DestructorSafetyType destructor = SharedPointer".  This means that all iterators refer to the map and its lock via std::shared_ptr, such that if the safe::map itself goes out of scope, the backend std::map and associated lock will stick around until all iterators expire.  However, shared pointers do carry some overhead in terms of their reference counting. If you now that your map will not descope while there are outstanding iterators, you can instead set destructor = NoDestructorChecks. This will instead use a std::unique_ptr to hold the std::map backend, and the iterators will refer to it with a bare pointer.
 
-== Potential future work ==
+## Potential future work 
 
 This class is build around std::map. std::map however is non-atomic. An atomic version of std::map could yield higher performance by reducing the necessary number of locking events.
 
 A class like this could be built around any stl containers whose iterators don't invalidate.  Technically it could be done around containers that invalidate their iterators as well, but one would also have to have the map refresh all existing iterators at every invalidation event, which would be very costly.
 
-== Feedback? ==
+## Feedback? 
 
 Please!  If you have any bugfixes or ideas for improvement (ideally with ready-made patches that don't cause problem in the test code, hint hint!  ;)  ), feel free to let me know (meme01@eaku.net). 
