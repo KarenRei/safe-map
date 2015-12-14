@@ -11,6 +11,13 @@ There are a few ways to work around this. For example, Intel's TBB contains seve
 
 These issues inspired the creation of safe_map: a complete wrapping of std::map to provide thread safety, even for iterators.  A wide variety of template parameters are available for controlling its behavior, even allowing for circular maps.
 
+== Compiling the test case ==
+
+As it's not intended as a standalone project, there is no makefile. To compile the test case, simply run:
+
+	g++ map_test.cpp --std=c++14 -lpthread -o map_test
+
+If needed, it could probably be adapted to work without c++14; however, it would be difficult if not impossible to avoid c++11.
 
 == How it works ==
 
