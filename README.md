@@ -74,7 +74,7 @@ decrement_active_circular, increment_active_circular: Acts like iteraton=OnlyFor
 
 decrement_forward, increment_forward: Acts like iteraton=OnlyForward, circular=false
 
-decrement_forward_then_backward, increment_forward_then_backard: Acts like iteraton=ForwardThenBackward (or ForwardSameThenBackward, if iteraton##ForwardSameThenBackward), circular=false.
+decrement_forward_then_backward, increment_forward_then_backard: Acts like iteraton=ForwardThenBackward (or ForwardSameThenBackward, if iteraton==ForwardSameThenBackward), circular=false.
 
 decrement_even_erased_linear, increment_even_erased_linear: Acts like iteration=EvenErased, circular=false
 
