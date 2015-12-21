@@ -21,6 +21,8 @@ public:
   MyValue(int _foo) : foo(_foo) {};
   operator int() const { return foo; };
 
+  MyValue& operator+=(const int rhs) { foo += rhs; return *this; };
+
   int foo;
 };
 #endif

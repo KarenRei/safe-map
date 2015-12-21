@@ -77,13 +77,101 @@ public:
 };
 
 template <class T>
+class weak : public base<T>
+{
+public:
+  using base<T>::base;
+
+/*
+  auto operator x (const weak<long double>& i) y -> decltype(base<T>::var x i.var) { return base<T>::var x i.var; };	\
+  auto operator x (const weak<double>& i) y { return base<T>::var x i.var; };		\
+  auto operator x (const weak<float>& i) y { return base<T>::var x i.var; };		\
+  auto operator x (const weak<unsigned long long>& i) y { return base<T>::var x i.var; };	\
+  auto operator x (const weak<long long>& i) y { return base<T>::var x i.var; };	\
+  auto operator x (const weak<unsigned long>& i) y { return base<T>::var x i.var; };	\
+  auto operator x (const weak<long>& i) y { return base<T>::var x i.var; };		\
+  auto operator x (const weak<unsigned int>& i) y { return base<T>::var x i.var; };	\
+  auto operator x (const weak<int>& i) y { return base<T>::var x i.var; };		\
+  auto operator x (const weak<unsigned short>& i) y { return base<T>::var x i.var; };	\
+  auto operator x (const weak<short>& i) y { return base<T>::var x i.var; };		\
+  auto operator x (const weak<unsigned char>& i) y { return base<T>::var x i.var; };	\
+  auto operator x (const weak<char>& i) y { return base<T>::var x i.var; };		\
+  auto operator x (const weak<bool>& i) y { return base<T>::var x i.var; };		\
+*/
+  #define DECLARE_HELPER_INTEGERS(x, y) \
+  auto operator x (const unsigned long long i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };		\
+  auto operator x (const long long i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };			\
+  auto operator x (const unsigned long i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };		\
+  auto operator x (const long i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };			\
+  auto operator x (const unsigned int i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };		\
+  auto operator x (const int i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };				\
+  auto operator x (const unsigned short i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };		\
+  auto operator x (const short i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };			\
+  auto operator x (const unsigned char i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };		\
+  auto operator x (const char i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };			\
+  auto operator x (const bool i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };
+
+  #define DECLARE_HELPER_FLOATS(x, y) \
+  auto operator x (const long double i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };			\
+  auto operator x (const double i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };			\
+  auto operator x (const float i) y -> decltype(base<T>::var x i) { return base<T>::var x i; };
+
+  #define DECLARE_HELPER(x, y) \
+  DECLARE_HELPER_INTEGERS(x, y) \
+  DECLARE_HELPER_FLOATS(x, y)
+
+  #define DECLARE(x)       DECLARE_HELPER(x, )
+  #define DECLARE_CONST(x) DECLARE_HELPER(x, const)
+  #define DECLARE_INTEGERS(x)       DECLARE_HELPER_INTEGERS(x, )
+  #define DECLARE_INTEGERS_CONST(x) DECLARE_HELPER_INTEGERS(x, const)
+  #define DECLARE_UNARY(x) auto operator x () -> decltype(x base<T>::var) { return x base<T>::var; };
+  #define DECLARE_UNARY_CONST(x) auto operator x () const -> decltype(x base<T>::var) { return x base<T>::var; };
+
+  DECLARE_INTEGERS_CONST(%);
+  DECLARE_CONST(+);
+  DECLARE_CONST(-);
+  DECLARE_CONST(*);
+  DECLARE_CONST(/);
+  DECLARE_INTEGERS_CONST(&);
+  DECLARE_INTEGERS_CONST(|);
+  DECLARE_INTEGERS_CONST(^);
+  DECLARE_INTEGERS_CONST(<<);
+  DECLARE_INTEGERS_CONST(>>);
+  DECLARE(=);
+  DECLARE_INTEGERS(%=);
+  DECLARE(+=);
+  DECLARE(-=);
+  DECLARE(*=);
+  DECLARE(/=);
+  DECLARE_INTEGERS(&=);
+  DECLARE_INTEGERS(|=);
+  DECLARE_INTEGERS(^=);
+  DECLARE_INTEGERS(<<=);
+  DECLARE_INTEGERS(>>=);
+  DECLARE_CONST(==);
+  DECLARE_CONST(!=);
+  DECLARE_CONST(>);
+  DECLARE_CONST(<);
+  DECLARE_CONST(>=);
+  DECLARE_CONST(<=);
+  DECLARE_UNARY(++);
+  DECLARE_UNARY(--);
+  DECLARE_UNARY_CONST(+);
+  DECLARE_UNARY_CONST(-);
+  DECLARE_UNARY_CONST(~);
+  DECLARE_UNARY_CONST(!);
+};
+/*
+template <class T>
 class strong : public base<T>
 {
 public:
   using base<T>::base;
   
+//  auto operator x (const strong<long double>& i) y -> decltype(strong<decltype(base<T>::var x i.var)>(base<T>::var x i.var)) { return strong<decltype(base<T>::var x i.var)>(base<T>::var x i.var); };	\
+  #undef DECLARE_HELPER
   #define DECLARE_HELPER(x, y) \
-  auto operator x (const strong<long double>& i) y { return strong<decltype(base<T>::var x i.var)>(base<T>::var x i.var); };	\
+  auto operator x (const strong<long double>& i) y { return strong<decltype(base<T>::var x i.var)>(base<T>::var x i.var); };		\
   auto operator x (const strong<double>& i) y { return strong<decltype(base<T>::var x i.var)>(base<T>::var x i.var); };		\
   auto operator x (const strong<float>& i) y { return strong<decltype(base<T>::var x i.var)>(base<T>::var x i.var); };		\
   auto operator x (const strong<unsigned long long>& i) y { return strong<decltype(base<T>::var x i.var)>(base<T>::var x i.var); };	\
@@ -112,6 +200,10 @@ public:
   auto operator x (const char i) y { return strong<decltype(base<T>::var x i)>(base<T>::var x i); };				\
   auto operator x (const bool i) y { return strong<decltype(base<T>::var x i)>(base<T>::var x i); };
 
+  #undef DECLARE
+  #undef DECLARE_CONST
+  #undef DECLARE_UNARY
+  #undef DECLARE_UNARY_CONST
   #define DECLARE(x)       DECLARE_HELPER(x, )
   #define DECLARE_CONST(x) DECLARE_HELPER(x, const)
   #define DECLARE_UNARY(x) auto operator x () { return strong<decltype(x base<T>::var)>(x base<T>::var); };
@@ -128,6 +220,7 @@ public:
   DECLARE_CONST(<<);
   DECLARE_CONST(>>);
   DECLARE(=);
+  DECLARE(%=);
   DECLARE(+=);
   DECLARE(-=);
   DECLARE(*=);
@@ -150,86 +243,7 @@ public:
   DECLARE_UNARY_CONST(~);
   DECLARE_UNARY_CONST(!);
 };
-
-template <class T>
-class weak : public base<T>
-{
-public:
-  using base<T>::base;
-
-  #undef DECLARE_HELPER
-  #define DECLARE_HELPER(x, y) \
-  auto operator x (const weak<long double>& i) y { return base<T>::var x i.var; };	\
-  auto operator x (const weak<double>& i) y { return base<T>::var x i.var; };		\
-  auto operator x (const weak<float>& i) y { return base<T>::var x i.var; };		\
-  auto operator x (const weak<unsigned long long>& i) y { return base<T>::var x i.var; };	\
-  auto operator x (const weak<long long>& i) y { return base<T>::var x i.var; };	\
-  auto operator x (const weak<unsigned long>& i) y { return base<T>::var x i.var; };	\
-  auto operator x (const weak<long>& i) y { return base<T>::var x i.var; };		\
-  auto operator x (const weak<unsigned int>& i) y { return base<T>::var x i.var; };	\
-  auto operator x (const weak<int>& i) y { return base<T>::var x i.var; };		\
-  auto operator x (const weak<unsigned short>& i) y { return base<T>::var x i.var; };	\
-  auto operator x (const weak<short>& i) y { return base<T>::var x i.var; };		\
-  auto operator x (const weak<unsigned char>& i) y { return base<T>::var x i.var; };	\
-  auto operator x (const weak<char>& i) y { return base<T>::var x i.var; };		\
-  auto operator x (const weak<bool>& i) y { return base<T>::var x i.var; };		\
-  auto operator x (const long double i) y { return base<T>::var x i; };			\
-  auto operator x (const double i) y { return base<T>::var x i; };			\
-  auto operator x (const float i) y { return base<T>::var x i; };			\
-  auto operator x (const unsigned long long i) y { return base<T>::var x i; };		\
-  auto operator x (const long long i) y { return base<T>::var x i; };			\
-  auto operator x (const unsigned long i) y { return base<T>::var x i; };		\
-  auto operator x (const long i) y { return base<T>::var x i; };			\
-  auto operator x (const unsigned int i) y { return base<T>::var x i; };		\
-  auto operator x (const int i) y { return base<T>::var x i; };				\
-  auto operator x (const unsigned short i) y { return base<T>::var x i; };		\
-  auto operator x (const short i) y { return base<T>::var x i; };			\
-  auto operator x (const unsigned char i) y { return base<T>::var x i; };		\
-  auto operator x (const char i) y { return base<T>::var x i; };			\
-  auto operator x (const bool i) y { return base<T>::var x i; };
-
-  #undef DECLARE
-  #undef DECLARE_CONST
-  #undef DECLARE_UNARY
-  #undef DECLARE_UNARY_CONST
-  #define DECLARE(x)       DECLARE_HELPER(x, )
-  #define DECLARE_CONST(x) DECLARE_HELPER(x, const)
-  #define DECLARE_UNARY(x) auto operator x () { return x base<T>::var; };
-  #define DECLARE_UNARY_CONST(x) auto operator x () const { return x base<T>::var; };
-
-  DECLARE_CONST(%);
-  DECLARE_CONST(+);
-  DECLARE_CONST(-);
-  DECLARE_CONST(*);
-  DECLARE_CONST(/);
-  DECLARE_CONST(&);
-  DECLARE_CONST(|);
-  DECLARE_CONST(^);
-  DECLARE_CONST(<<);
-  DECLARE_CONST(>>);
-  DECLARE(+=);
-  DECLARE(-=);
-  DECLARE(*=);
-  DECLARE(/=);
-  DECLARE(&=);
-  DECLARE(|=);
-  DECLARE(^=);
-  DECLARE(<<=);
-  DECLARE(>>=);
-  DECLARE_CONST(==);
-  DECLARE_CONST(!=);
-  DECLARE_CONST(>);
-  DECLARE_CONST(<);
-  DECLARE_CONST(>=);
-  DECLARE_CONST(<=);
-  DECLARE_UNARY(++);
-  DECLARE_UNARY(--);
-  DECLARE_UNARY_CONST(+);
-  DECLARE_UNARY_CONST(-);
-  DECLARE_UNARY_CONST(~);
-  DECLARE_UNARY_CONST(!);
-};
-
+*/
 ///////////////////////////////////////////////////////////////////////////////
 
 };	// end namespace "number"
