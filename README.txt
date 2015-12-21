@@ -15,9 +15,7 @@ These issues inspired the creation of safe_map: a complete wrapping of std::map 
 
 As it's not intended as a standalone project, there is no makefile. To compile the test case, simply run:
 
-	g++ map_test.cpp --std=c++14 -lpthread -o map_test
-
-If needed, it could probably be adapted to work without c++14; however, it would be difficult if not impossible to avoid c++11.
+	g++ map_test.cpp --std=c++11 -lpthread -o map_test
 
 == How it works ==
 
