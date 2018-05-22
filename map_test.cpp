@@ -2,6 +2,8 @@
 // I N C L U D E S ////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <functional>  //for g++ 7.2 compilation support
+#include <vector>	   //for g++ 7.2 compilation support	
 
 #include "safemap.h"
 
